@@ -4,8 +4,7 @@ build reference file for XXX, XX for imputation
 example command line : 
 nextflow build_ref.nf --input_vcf_ref file_vcf
 
-### arguments 
-* `input_vcf_ref` :  file vcf to build panel
+### arguments  
 * filter file :
  * `input_col_ref` : file contains position to add to reference [Optional]
   * first column must be same identifiant that vcf, each column must be rs\_chr\_pos\_1 for allele 1 and rs\_chr\_pos\_2 for allele 2
@@ -15,6 +14,8 @@ nextflow build_ref.nf --input_vcf_ref file_vcf
  * `to_bp` : position begin [Optional]
  * `from_bp` : position begin [Optional]
  * `maf` : minor allele frequencie [Optional]
+ * `exclude_bed`
+ * `bed` : 
 * to do :
  * `extract` : not implemented
 * convert between format (optional):
@@ -22,13 +23,16 @@ nextflow build_ref.nf --input_vcf_ref file_vcf
  * `convert_file` : file for crossmap for instance [file uscs](http://hgdownload.cse.ucsc.edu/goldenpath/hg38/liftOver/) [default NULL] if file not present will be not convert
  * `fasta_file` : fasta file from final reference 
  * `bin_crossmap` : [default : ~/.local/bin/CrossMap_beta.py]
-
+General Arguements for imputation of reference panel :
+ * `genetic_map` : genetic map, 
 * beagle :
  * `bin_beagle` : binary beagle [default beagle]
- * `genetic_map` : genetic map, optional [NULL]
  * `otheropt_beagle` : other option 
+* shapeit :
+ * `thr_shapeit` : threshold for shapeit [default 0.95]
+ * `bin_shapeit`
 
-
+## imputed vcf : `build_ref.nf`
 ## need
 * general : nextflow,  
 * `build_ref.nf` :  tabix, vcftools, CrossMapp

@@ -65,6 +65,8 @@ params.memory_vcftools="10GB"
 params.memory_tabix="10GB"
 params.cpus_other=4
 params.bin_crossmap="~/.local/bin/CrossMap_beta.py"
+params.exclude_bed=""
+params.bed=""
 params.genetic_map=""
 params.genetic_map_beagle=""
 
@@ -121,20 +123,30 @@ if(vcfrefext){
 
 vcfrefisgz=file_vcf_tofilter.getExtension()=='gz'
 //case where need to do some filtering or added information
-if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.keep!="" || params.maf!="" || params.convert_file!=""){
+if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.keep!="" || params.maf!="" || params.convert_file!="" || params.exclude_bed!=""){
 
-  if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="")){
+  if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.exclude_bed!="" || params.bed!=""){
      if(params.keep!=""){
       keep_file_ch=Channel.fromPath(params.keep)
      }else{
       keep_file_ch=file('No_ind')
      }
+     if(params.exclude_bed!=""){
+       exclude_bed_ch=Channel.fromPath(params.exclude_bed)
+     }else{
+       exclude_bed_ch=file("exclude_bed_no")
+     }
+     if (params.bed=="") bed_ch=Channel.fromPath(params.bed)
+     else bed_ch=file("bed_no")
+
      process FiltersVcfI{
       memory params.memory_vcftools
       time params.big_time
       input: 
          file(file_vcf) from file_vcf_tofilter
          file(file_ind) from keep_file_ch 
+         file(exclude_bed) from exclude_bed_ch
+         file(bedf) from bed_ch
       output :
          file("${out_file}.recode.vcf") into file_vcf_filter_1
       script :
@@ -144,9 +156,11 @@ if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!
          begin=params.from_bp!=""? "--from-bp  ${params.from_bp}" : "" 
          maf=params.maf!="" ? "--maf ${params.maf} " : ""
          keep=params.keep!="" ? " --keep ${file_ind} " : ""
+         excl_bed=params.exclude_bed!="" ? " --exclude_bed $exclude_bed " : "" 
+         bed=params.bed!="" ? " --bed $bedf " : ""
          out_file="${params.output}_filt1"
          """
-         ${params.bin_vcftools} $gvcf $file_vcf $chro $end $begin $maf $keep --out ${out_file} --recode --recode-INFO-all
+         ${params.bin_vcftools} $gvcf $file_vcf $chro $end $begin $maf $keep --out ${out_file} --recode --recode-INFO-all $excl_bed $bed
          """ 
      } 
      vcfrefisgz=0
