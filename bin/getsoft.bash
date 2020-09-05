@@ -11,3 +11,7 @@ wget https://mathgen.stats.ox.ac.uk/genetics_software/shapeit/shapeit.v2.r904.gl
 tar -xzf shapeit.v2.r904.glibcv2.12.linux.tar.gz
 cp shapeit.v2.904.2.6.32-696.18.7.el6.x86_64/bin/shapeit .
 rm -rf shapeit.v2.904.2.6.32-696.18.7.el6.x86_64/ shapeit.v2.r904.glibcv2.12.linux.tar.gz
+wget https://faculty.washington.edu/browning/beagle/beagle.18May20.d20.jar .
+#chmod +x beagle.18May20.d20.jar
+echo "java -jar $PWD/beagle.18May20.d20.jar \$@" > beagle
+chmod +x beagle

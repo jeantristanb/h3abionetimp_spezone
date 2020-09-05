@@ -7,4 +7,7 @@ around=100000
 beginr=`expr $begin \- $around`
 endr=`expr $end \+ $around`
 fasta=~/Data/CrossMap/hg19.fa
-nextflow /home/jeantristan/Travail/git/PhaseImp/h3abionetimp_spezone/build_ref.nf --input_vcf_ref $vcffile --maf 0.01 --chr $chr --from_bp $beginr --to_bp $endr -profile slurm --convert_file $CrossMap --fasta_file $fasta -resume
+input_col_ref=/spaces/jeantristan/Cassandra/1000GTest/Test_1000G_Cluster.xlsx
+FileInd=/spaces/jeantristan/Cassandra/1000GTest/IndList_1000G.ind
+genetic_map=/home/jeantristan/Data/Imputed2/1000GP_Phase3/genetic_map_chr19_combined_b37.txt
+nextflow /home/jeantristan/Travail/git/PhaseImp/h3abionetimp_spezone/build_ref.nf --input_vcf_ref $vcffile --maf 0.01 --chr $chr --from_bp $beginr --to_bp $endr -profile slurm --convert_file $CrossMap --fasta_file $fasta -resume --input_col_ref  $input_col_ref --keep $FileInd --genetic_map $genetic_map

@@ -8,7 +8,7 @@ nextflow build_ref.nf --input_vcf_ref file_vcf
 * `input_vcf_ref` :  file vcf to build panel
 * filter file :
  * `input_col_ref` : file contains position to add to reference [Optional]
-  * first column must be same identifiant that vcf, each column must be chr\_pos 
+  * first column must be same identifiant that vcf, each column must be rs\_chr\_pos\_1 for allele 1 and rs\_chr\_pos\_2 for allele 2
   * used R to merge both
  * `keep` : individual to keep  [Optional]
  * `chr` : chromosome specific to keep [Optional]
@@ -23,6 +23,12 @@ nextflow build_ref.nf --input_vcf_ref file_vcf
  * `fasta_file` : fasta file from final reference 
  * `bin_crossmap` : [default : ~/.local/bin/CrossMap_beta.py]
 
+* beagle :
+ * `bin_beagle` : binary beagle [default beagle]
+ * `genetic_map` : genetic map, optional [NULL]
+ * `otheropt_beagle` : other option 
+
+
 ## need
 * general : nextflow,  
-* `build_ref.nf` :  tabix, vcftools, Cross
+* `build_ref.nf` :  tabix, vcftools, CrossMapp
