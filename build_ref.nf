@@ -58,6 +58,8 @@ params.to_bp=""
 params.extract=""
 params.maf=""
 params.convert_file=""
+/**/
+//params.bp_flanking=1
 
 /**/
 params.thr_shapeit=0.95
@@ -69,6 +71,7 @@ params.bin_vcftools="vcftools"
 params.bin_bcftools="bcftools"
 params.bin_shapeit="shapeit"
 params.bin_bref3="bref3"
+params.bin_eagle="eagle"
 
 params.memory_vcftools="10GB"
 params.memory_tabix="10GB"
@@ -253,7 +256,7 @@ process  normvcf{
      set file(filevcf), file(filevcfidx) from file_vcf_filter_index2
   publishDir "${params.output_dir}/vcfnorm/", overwrite:true, mode:'copy'
   output :
-     set file("${fileout}"), file("${fileout}.csi") into (file_vcf_filter_index_norm , file_vcf_filter_index2_norm)
+     set file("${fileout}"), file("${fileout}.csi") into (file_vcf_filter_index_norm , file_vcf_filter_index_norm_2, file_vcf_filter_index_norm_3)
   script :
       fileout="${params.output}_sort_norm.vcf.gz" 
       """
@@ -276,7 +279,7 @@ process phasebeagle{
  publishDir "${params.output_dir}/beagle/", overwrite:true, mode:'copy'
  output :
    file("${headout}*")
-   file( $headout".vcf.gz"), file( $headout".vcf.gz.csi") into file_vcf_beaglephase
+   set file("${headout}.vcf.gz"), file("${headout}.vcf.gz.csi") into file_vcf_beaglephase
  script :
    map=(params.genetic_map_beagle!="")?"map=$genet_map" : ""
    headout="${params.output}_phasebeagle"
@@ -286,14 +289,14 @@ process phasebeagle{
    """
 }
 
-process phasebeagle{
+process convertbeagle{
  input :
    set file(filevcf), file(filevcfidx) from file_vcf_beaglephase
  publishDir "${params.output_dir}/beagle/", overwrite:true, mode:'copy'
  output :
-   file("${headout}*")
+   file("${headout}")
  script :
-   headout="${params.output}_phasebeagle."
+   headout="${params.output}_phasebeagle.bref3"
    """
    ${params.bin_bref3}  $filevcf > $headout
    """
@@ -349,3 +352,27 @@ process shapeit_convert_vcf{
 }
 
 
+gm_ch3=Channel.fromPath(params.genetic_map)
+process eagle_phase{
+   input :
+     set file(filevcf), file(filevcfidx) from file_vcf_filter_index_norm_3
+     file(map) from gm_ch3
+    publishDir "${params.output_dir}/eagle/vcf/", overwrite:true, mode:'copy'
+    output :
+      file("${file_out}*")
+    script :
+      chro=params.chr!=""? "--chrom=${params.chr}" : ""
+      begin=params.to_bp!=""? "--bpStart=${params.to_bp}" : ""
+      end=params.from_bp!=""? "--bpEnd=${params.from_bp}" : ""
+      file_out="${params.output}_prephase_eagle"
+      """
+        ${params.bin_eagle}\
+                --vcfTarget=${filevcf} \
+                --geneticMapFile=${map} \
+                --vcfOutFormat=z \
+                $chro \
+                $begin \
+                $end \
+                --outPrefix=${file_out} 2>&1 | tee ${file_out}.log
+      """
+}

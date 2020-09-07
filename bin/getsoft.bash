@@ -18,3 +18,7 @@ chmod +x beagle
 wget https://faculty.washington.edu/browning/beagle/bref3.18May20.d20.jar .
 echo "java -jar $PWD/bref3.18May20.d20.jar \$@" > bref3
 chmod +x bref3
+wget https://storage.googleapis.com/broad-alkesgroup-public/Eagle/downloads/Eagle_v2.4.1.tar.gz 
+tar -xzf Eagle_v2.4.1.tar.gz
+cp Eagle_v2.4.1/eagle .
+
