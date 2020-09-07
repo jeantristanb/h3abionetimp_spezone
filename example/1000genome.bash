@@ -16,13 +16,13 @@ genetic_map=/home/jeantristan/Data/Imputed2/1000GP_Phase3/genetic_map_chr19_comb
 ## if file in bed 
 GZF=All_20180423.vcf.gz ##
 #nextflow run h3abionet/h3agwas/formatdata/plk_in_vcf_imp.nf --input_pat $FileBed2 --output_dir $chro"_"$begin38r"_"$end38r --file_ref_gzip $file_ref -resume --reffasta $fasta -profile slurm 
-file_vcfi=reference_panel/vcffilt/refpanel_sort.vcf.gz
+file_vcfi=reference_panel/infopos_add/refpanel_addpos.vcf
 ## for test we used subsample of snps using h3agwas position around 
 
 begin37=45403041
 end37=45403090
 begin37r=`expr $begin37 \- $around`
 end37r=`expr $end37 \+ $around`
-#awk -v begin=$begin37r -v end=$end37r '{if($1=="9" && $4>=(begin-100000) && $4<=(end+100000)){print "chr"$1"\t"$4"\t"$4}}' /dataE/AWIGenGWAS/plink/swt/input/swt.bim > pos_cheap
+awk -v begin=$begin37r -v end=$end37r '{if($1=="19" && $4>=(begin-100000) && $4<=(end+100000)){print "chr"$1"\t"$4"\t"$4}}' /dataE/AWIGenGWAS/plink/swt/input/swt.bim > pos_cheap
 
-:nextflow  run ../imputed_data.nf --vcf $file_vcfi --maf 0.01 --chr $chr --from_bp $begin37r --to_bp $end37r  -profile slurm --bed pos_cheap
+nextflow  run ../imputed_data.nf --vcf $file_vcfi --maf 0.01 --chr $chr --from_bp $begin37r --to_bp $end37r  -profile slurm --bed pos_cheap

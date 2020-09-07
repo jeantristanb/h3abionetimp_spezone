@@ -15,3 +15,6 @@ wget https://faculty.washington.edu/browning/beagle/beagle.18May20.d20.jar .
 #chmod +x beagle.18May20.d20.jar
 echo "java -jar $PWD/beagle.18May20.d20.jar \$@" > beagle
 chmod +x beagle
+wget https://faculty.washington.edu/browning/beagle/bref3.18May20.d20.jar .
+echo "java -jar $PWD/bref3.18May20.d20.jar \$@" > bref3
+chmod +x bref3

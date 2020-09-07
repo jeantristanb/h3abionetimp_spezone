@@ -36,8 +36,8 @@ def params_help = new LinkedHashMap(helps)
 
 params.queue      = 'batch'
 params.work_dir   = "$HOME/"
-params.output_dir = "${params.work_dir}/reference_panel"
-params.output = "refpanel"
+params.output_dir = "${params.work_dir}/imputed_file"
+params.output = "imputed"
 params.otheropt_beagle = ""
 /*"input_col_ref", "keep", "chr", "from_bp", "to_bp", "extract", "keep", "output_dir"*/
 params.input_col_ref=""
@@ -99,7 +99,7 @@ if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && p
          file(file_ind) from keep_file_ch
          file(exclude_bed) from exclude_bed_ch
          file(bedf) from bed_ch
-      publishDir "${params.output_dir}/filters_imp/", overwrite:true, mode:'copy'
+      publishDir "${params.output_dir}/vcffilter/", overwrite:true, mode:'copy'
       output :
          file("${out_file}.recode.vcf.gz") into file_vcf_filter_1
       script :
@@ -137,6 +137,8 @@ if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && p
   file_vcf_filter=file_vcf_tofilter
 }
 }
+
+/*imputed */
 
 
 

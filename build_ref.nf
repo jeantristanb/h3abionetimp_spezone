@@ -30,7 +30,7 @@ def helps = [ 'help' : 'help' ]
 
 allowed_params = ["input_vcf_ref", "input_col_ref", "keep", "chr", "from_bp", "to_bp", "extract", "keep", "output_dir", "maf", "output", "big_time", "convert_file", "fasta_file"]
 infosys=["scripts"]
-infosoft=["bin_vcftools", "bin_vcftools", "big_time", "bin_tabix", "bin_crossmap", "bin_bcftools", "bin_beagle", "bin_shapeit"]
+infosoft=["bin_vcftools", "bin_vcftools", "big_time", "bin_tabix", "bin_crossmap", "bin_bcftools", "bin_beagle", "bin_shapeit", "bin_bref3"]
 allowed_params+=infosoft
 
 params.each { parm ->
@@ -68,6 +68,7 @@ params.bin_tabix="tabix"
 params.bin_vcftools="vcftools"
 params.bin_bcftools="bcftools"
 params.bin_shapeit="shapeit"
+params.bin_bref3="bref3"
 
 params.memory_vcftools="10GB"
 params.memory_tabix="10GB"
@@ -275,6 +276,7 @@ process phasebeagle{
  publishDir "${params.output_dir}/beagle/", overwrite:true, mode:'copy'
  output :
    file("${headout}*")
+   file( $headout".vcf.gz"), file( $headout".vcf.gz.csi") into file_vcf_beaglephase
  script :
    map=(params.genetic_map_beagle!="")?"map=$genet_map" : ""
    headout="${params.output}_phasebeagle"
@@ -283,6 +285,21 @@ process phasebeagle{
    ${params.bin_bcftools} index $headout".vcf.gz"
    """
 }
+
+process phasebeagle{
+ input :
+   set file(filevcf), file(filevcfidx) from file_vcf_beaglephase
+ publishDir "${params.output_dir}/beagle/", overwrite:true, mode:'copy'
+ output :
+   file("${headout}*")
+ script :
+   headout="${params.output}_phasebeagle."
+   """
+   ${params.bin_bref3}  $filevcf > $headout
+   """
+}
+
+
 
 
 gm_ch2=Channel.fromPath(params.genetic_map)
