@@ -10,7 +10,8 @@ fasta=~/Data/CrossMap/hg19.fa
 input_col_ref=/spaces/jeantristan/Cassandra/1000GTest/Test_1000G_Cluster.xlsx
 FileInd=/spaces/jeantristan/Cassandra/1000GTest/IndList_1000G.ind
 genetic_map=/home/jeantristan/Data/Imputed2/1000GP_Phase3/genetic_map_chr19_combined_b37.txt
-nextflow ../build_ref.nf --input_vcf_ref $vcffile_ref --maf 0.01 --chr $chr --from_bp $begin38r --to_bp $end38r -profile slurm --convert_file $CrossMap --fasta_file $fasta -resume --input_col_ref  $input_col_ref --keep $FileInd --genetic_map $genetic_map
+#nextflow ../build_ref.nf --input_vcf_ref $vcffile_ref --maf 0.01 --chr $chr --from_bp $begin38r --to_bp $end38r -profile slurm --convert_file $CrossMap --fasta_file $fasta -resume --input_col_ref  $input_col_ref --keep $FileInd --genetic_map $genetic_map
+#exit
 
 ## if file in bed 
 GZF=All_20180423.vcf.gz ##
@@ -18,6 +19,10 @@ GZF=All_20180423.vcf.gz ##
 file_vcfi=reference_panel/vcffilt/refpanel_sort.vcf.gz
 ## for test we used subsample of snps using h3agwas position around 
 
+begin37=45403041
+end37=45403090
+begin37r=`expr $begin37 \- $around`
+end37r=`expr $end37 \+ $around`
+#awk -v begin=$begin37r -v end=$end37r '{if($1=="9" && $4>=(begin-100000) && $4<=(end+100000)){print "chr"$1"\t"$4"\t"$4}}' /dataE/AWIGenGWAS/plink/swt/input/swt.bim > pos_cheap
 
-nexflow run ../imputed_data.nf --vcf $file_vcfi --maf 0.01 --chr $chr --from_bp $begin38r --to_bp $end38r  -profile slurm
-
+:nextflow  run ../imputed_data.nf --vcf $file_vcfi --maf 0.01 --chr $chr --from_bp $begin37r --to_bp $end37r  -profile slurm --bed pos_cheap

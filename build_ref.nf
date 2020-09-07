@@ -14,6 +14,14 @@
 
 //---- General definitions --------------------------------------------------//
 
+// Checks if the file exists
+checker = { fn ->
+   if (fn.exists())
+       return fn;
+    else
+       error("\n\n-----------------\nFile $fn does not exist\n\n---\n")
+}
+
 import java.nio.file.Paths
 
 
@@ -117,11 +125,12 @@ if(vcfrefext){
  }
 
 
+vcfrefisgz=file_vcf_tofilter.getExtension()=='gz'
 }else{
       file_vcf_tofilter=Channel.fromPath(params.input_vcf_ref)
+      vcfrefisgz=file(params.input_vcf_ref)=='gz'
 }
 
-vcfrefisgz=file_vcf_tofilter.getExtension()=='gz'
 //case where need to do some filtering or added information
 if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.keep!="" || params.maf!="" || params.convert_file!="" || params.exclude_bed!=""){
 
@@ -136,7 +145,7 @@ if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!
      }else{
        exclude_bed_ch=file("exclude_bed_no")
      }
-     if (params.bed=="") bed_ch=Channel.fromPath(params.bed)
+     if (params.bed!="") bed_ch=Channel.fromPath(params.bed)
      else bed_ch=file("bed_no")
 
      process FiltersVcfI{

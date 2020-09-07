@@ -52,18 +52,32 @@ params.exclude_bed=""
 params.bed=""
 params.vcf=""
 
+params.bin_beagle="beagle"
+params.bin_tabix="tabix"
+params.bin_vcftools="vcftools"
+params.bin_bcftools="bcftools"
+params.bin_shapeit="shapeit"
+
+params.memory_vcftools="10GB"
+params.memory_tabix="10GB"
+params.cpus_other=4
+params.bin_crossmap="~/.local/bin/CrossMap_beta.py"
+params.genetic_map=""
+params.genetic_map_beagle=""
+
+
 if(params.vcf==""){
   println "This workflow requires vcf file to imputed : --vcf"
   exit 1
 }
 
+println params.vcf
 file_vcf_tofilter=Channel.fromPath(params.vcf)
-vcfrefisgz=file_vcf_tofilter.getExtension()=='gz'
+vcfrefisgz=file(params.vcf).getExtension()=='gz'
+//vcfrefisgz=params.vcf.getExtension()=='gz'
 
-if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.exclude_bed!="" || params.bed!="" || params.){
 
-
-  if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.exclude_bed!="" || params.bed!=""){
+if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.exclude_bed!="" || params.bed!=""){
      if(params.keep!=""){
       keep_file_ch=Channel.fromPath(params.keep)
      }else{
@@ -74,7 +88,7 @@ if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && p
      }else{
        exclude_bed_ch=file("exclude_bed_no")
      }
-     if (params.bed=="") bed_ch=Channel.fromPath(params.bed)
+     if (params.bed!="") bed_ch=Channel.fromPath(params.bed)
      else bed_ch=file("bed_no")
 
      process FiltersVcfI{
@@ -100,39 +114,12 @@ if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && p
          out_file="${params.output}_filt1"
          """
          ${params.bin_vcftools} $gvcf $file_vcf $chro $end $begin $maf $keep --out ${out_file} --recode --recode-INFO-all $excl_bed $bed
-         ${params.bcftools} sort ${out_file}".recode.vcf"  -Oz -o  ${out_file}".recode.vcf.gz"
+         ${params.bin_bcftools} sort ${out_file}".recode.vcf"  -Oz -o  ${out_file}".recode.vcf.gz"
          """
      }
 
-  }
-  if (params.convert_file!=""){
-    if(params.fasta_file==""){
-      println "error fasta file not found"
-      exit 1
-    }
-    fastafile_ch=Channel.fromPath(params.fasta_file)
-    file_conv_ch=Channel.fromPath(params.convert_file)
-    process ConvertPosition{
-      input :
-         file(vcfI) from file_vcf_filter_1
-         file(convert) from file_conv_ch
-         file(fasta) from fastafile_ch
-       publishDir "${params.output_dir}/crossmap_out/", overwrite:true, mode:'copy'
-       output :
-          file("${vcffinal}.unmap")
-          file(vcffinal) into file_vcf_filter_2
-       script :
-        vcffinal="${params.output}_filt1_newpos.vcf"
-        """
-        ${params.bin_crossmap}  vcf $convert $vcfI $fasta $vcffinal
-        """
-    }
-  }else{
-    file_vcf_filter = file_vcf_filter_1
-  }
-
 }else{
-if(vcfrefisgz){
+ if(vcfrefisgz){
   process gzipvcf{
       memory params.memory_vcftools
       time params.big_time
@@ -143,7 +130,7 @@ if(vcfrefisgz){
       script :
          out_file="${params.output}_filt1"
          """
-         ${params.bcftools} sort ${file_vcf}".recode.vcf"  -Oz -o  ${out_file}".recode.vcf.gz" 
+         ${params.bin_bcftools} sort ${file_vcf}".recode.vcf"  -Oz -o  ${out_file}".recode.vcf.gz" 
          """
   }
 }else{
