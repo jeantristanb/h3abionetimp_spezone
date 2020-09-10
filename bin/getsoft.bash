@@ -6,7 +6,7 @@ rm -rf phase.2.1.1.linux phase.2.1.1.linux.tar.gz
 #git clone https://github.com/lstevison/vcf-conversion-tools
 #cp vcf-conversion-tools/vcf2fastPHASE.pl .
 #rm -rf vcf-conversion-tools
-#chmdo +x vcf2fastPHASE.pl
+#chmod +x vcf2fastPHASE.pl
 wget https://mathgen.stats.ox.ac.uk/genetics_software/shapeit/shapeit.v2.r904.glibcv2.12.linux.tar.gz 
 tar -xzf shapeit.v2.r904.glibcv2.12.linux.tar.gz
 cp shapeit.v2.904.2.6.32-696.18.7.el6.x86_64/bin/shapeit .
@@ -21,4 +21,6 @@ chmod +x bref3
 wget https://storage.googleapis.com/broad-alkesgroup-public/Eagle/downloads/Eagle_v2.4.1.tar.gz 
 tar -xzf Eagle_v2.4.1.tar.gz
 cp Eagle_v2.4.1/eagle .
-
+git clone  https://github.com/odelaneau/shapeit4.git 
+cd 
+#scl enable devtoolset-8 bash

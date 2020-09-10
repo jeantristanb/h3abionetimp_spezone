@@ -81,6 +81,7 @@ params.exclude_bed=""
 params.bed=""
 params.genetic_map=""
 params.genetic_map_beagle=""
+params.max_missing=0.99
 
 if (params.help) {
     params.each {
@@ -132,13 +133,13 @@ if(vcfrefext){
 vcfrefisgz=file_vcf_tofilter.getExtension()=='gz'
 }else{
       file_vcf_tofilter=Channel.fromPath(params.input_vcf_ref)
-      vcfrefisgz=file(params.input_vcf_ref)=='gz'
+      vcfrefisgz=file(params.input_vcf_ref).getExtension()=='gz'
 }
 
 //case where need to do some filtering or added information
-if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.keep!="" || params.maf!="" || params.convert_file!="" || params.exclude_bed!=""){
+if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.keep!="" || params.maf!="" || params.convert_file!="" || params.exclude_bed!=""|| params.max_missing<1){
 
-  if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.exclude_bed!="" || params.bed!=""){
+  if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.exclude_bed!="" || params.bed!="" || params.max_missing<1){
      if(params.keep!=""){
       keep_file_ch=Channel.fromPath(params.keep)
      }else{
@@ -163,7 +164,7 @@ if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!
       output :
          file("${out_file}.recode.vcf") into file_vcf_filter_1
       script :
-         gvcf= vcfrefisgz  ? "--gzvcf" : "--vcf" 
+         gvcf= file_vcf.getExtension()  ? "--gzvcf" : "--vcf" 
          chro=params.chr!=""? "--chr ${params.chr}" : ""
          end=params.to_bp!=""? "--to-bp  ${params.to_bp}" : "" 
          begin=params.from_bp!=""? "--from-bp  ${params.from_bp}" : "" 
@@ -172,8 +173,9 @@ if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!
          excl_bed=params.exclude_bed!="" ? " --exclude_bed $exclude_bed " : "" 
          bed=params.bed!="" ? " --bed $bedf " : ""
          out_file="${params.output}_filt1"
+         maxmissing=params.max_missing<1 ? " --max-missing ${params.max_missing} " : ""
          """
-         ${params.bin_vcftools} $gvcf $file_vcf $chro $end $begin $maf $keep --out ${out_file} --recode --recode-INFO-all $excl_bed $bed
+         ${params.bin_vcftools} $gvcf $file_vcf $chro $end $begin $maf $keep --out ${out_file} --recode --recode-INFO-all $excl_bed $bed $maxmissing
          """ 
      } 
      vcfrefisgz=0
@@ -244,8 +246,11 @@ process IndexFile{
      set file("${fileout}.gz"), file("${fileout}.gz.csi") into (file_vcf_filter_index,file_vcf_filter_index2)
   script :
       fileout="${params.output}_sort.vcf"
+      logfilt="${params.output}_filter.log"
+      readvcf=(vcfrefisgz)? "zcat " : "cat"
       """
-      ${params.bin_bcftools} sort $filevcf| bgzip -c > $fileout".gz"
+      check_vcf.py --vcf $filevcf --out vcftmp.vcf > $logfilt
+      ${params.bin_bcftools} sort vcftmp.vcf| bgzip -c > $fileout".gz"
       ${params.bin_bcftools} index $fileout".gz"
       """
 }
@@ -318,7 +323,8 @@ process shapeit_phase{
  script :
    headout="${params.output}_phaseshapeit"
    """
-   ${params.bin_shapeit} -V $filevcf --input-map $genet_map --input-thr ${params.thr_shapeit} --output-max $headout"_i.haps" $headout"_i.sample" --thread ${params.cpus_other}  --force
+    awk '{print \$2" "\$3" "\$4}' $genet_map > tmpmap.txt
+   ${params.bin_shapeit} -V $filevcf --input-map tmpmap.txt --input-thr ${params.thr_shapeit} --output-max $headout"_i.haps" $headout"_i.sample" --thread ${params.cpus_other}  --force
 
    """
 }
@@ -367,12 +373,15 @@ process eagle_phase{
       file_out="${params.output}_prephase_eagle"
       """
         ${params.bin_eagle}\
-                --vcfTarget=${filevcf} \
+                --vcf=${filevcf} \
                 --geneticMapFile=${map} \
                 --vcfOutFormat=z \
                 $chro \
                 $begin \
                 $end \
+                --maxMissingPerSnp=${params.max_missing} \
+                --maxMissingPerIndiv=${params.max_missing} \
                 --outPrefix=${file_out} 2>&1 | tee ${file_out}.log
       """
 }
+
