@@ -95,7 +95,7 @@ def get_stat(loci, stat_ind, gethead=False):
        stat_ind[cmt_ind][3]+=1   
        statsnp[3]+=1
   cmt_ind+=1 
- return loci[0]+"\t"+loci[1]+"\t"+ref+"\t"+",".join(loci[3])+"\t"+str(delet)+"\t"+str(insert)+"\t"+"\t".join([str(x) for x in statsnp])+"\n"
+ return loci[0]+"\t"+loci[1]+"\t"+ref+"\t"+",".join(loci[3])+"\t"+str(delet)+"\t"+str(insert)+"\t"+"\t".join([str(x) for x in statsnp])
 
 
 
@@ -103,7 +103,7 @@ args = parseArguments()
 
 headervcf=get_header_vcf(args.vcf)
 NCol=len(headervcf[-1])
-NameInd=headervcf[-1][9::]
+NameInd=headervcf[-1].split("\t")[9::]
 
 readvcf=open_file(args.vcf)
 statvcfind=[[0,0,0,0] for x in range(len(NameInd))]
@@ -114,3 +114,11 @@ for line in readvcf :
       continue 
     posinfo=get_info_pos(line) 
     writesnp.write(get_stat(posinfo, statvcfind)+'\n')
+writesnp.close()
+writeind=open(args.out+'_ind.txt', 'w')
+Head="ID\tnbrefhom\tnbalthom\tnbhet\tnbmissing"
+writeind.write(Head+'\n')
+cmtind=0
+for ind in statvcfind :
+   writeind.write(NameInd[cmtind]+"\t"+"\t".join([str(x) for x in ind])+"\n")
+writeind.close()

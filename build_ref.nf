@@ -243,7 +243,7 @@ process IndexFile{
      file(filevcf) from file_vcf_filter_final
   publishDir "${params.output_dir}/vcffilt/", overwrite:true, mode:'copy'
   output :
-     set file("${fileout}.gz"), file("${fileout}.gz.csi") into (file_vcf_filter_index,file_vcf_filter_index2)
+     set file("${fileout}.gz"), file("${fileout}.gz.csi") into (file_vcf_filter_index,file_vcf_filter_index2, file_vcf_fileter_index3)
   script :
       fileout="${params.output}_sort.vcf"
       logfilt="${params.output}_filter.log"
@@ -253,6 +253,19 @@ process IndexFile{
       ${params.bin_bcftools} sort vcftmp.vcf| bgzip -c > $fileout".gz"
       ${params.bin_bcftools} index $fileout".gz"
       """
+}
+
+process ComputeStatFilter{
+  input :
+      set file(filevcf), file(filevcfidx)  from file_vcf_fileter_index3
+  publishDir "${params.output_dir}/vcffilt/", overwrite:true, mode:'copy'
+  output :
+      file("$headout*")
+  script :
+    headout="${params.output}_stat"
+    """
+    compute_statvcf.py  --vcf $headout --out $headout
+    """
 }
 
 
@@ -359,6 +372,8 @@ process shapeit_convert_vcf{
 
 
 gm_ch3=Channel.fromPath(params.genetic_map)
+//                --maxMissingPerSnp=${params.max_missing} \
+//                --maxMissingPerIndiv=${params.max_missing} \
 process eagle_phase{
    input :
      set file(filevcf), file(filevcfidx) from file_vcf_filter_index_norm_3
@@ -379,8 +394,6 @@ process eagle_phase{
                 $chro \
                 $begin \
                 $end \
-                --maxMissingPerSnp=${params.max_missing} \
-                --maxMissingPerIndiv=${params.max_missing} \
                 --outPrefix=${file_out} 2>&1 | tee ${file_out}.log
       """
 }
