@@ -21,6 +21,7 @@ corr_allele<-data.frame(InitialAll=c('.',tba1a2nomiss), UseAll=c('.',tba1a2nomis
 corr_allele<-data.frame(InitialAll=c('.',tba1a2nomiss), UseAll=c('.',NewList[1:nballele]),NumAll=c('.',0:(nballele-1)), stringsAsFactors=F)
 }
 write.csv(corr_allele, file=paste(filecorresout,'_',rs,'_corrallele.csv',sep=''),row.names=F)
+print(corr_allele)
 Ref<-corr_allele[2,2]
 Alt<-paste(corr_allele[3:nrow(corr_allele),2],collapse=',')
 Allele<-merge(data.frame(Id=Id ,A1=a1, A2=a2, stringsAsFactors=F), InfoVcf, by=1,all.y=T)

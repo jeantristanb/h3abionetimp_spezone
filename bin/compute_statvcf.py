@@ -95,7 +95,7 @@ def get_stat(loci, stat_ind, gethead=False):
        stat_ind[cmt_ind][3]+=1   
        statsnp[3]+=1
   cmt_ind+=1 
- return loci[0]+"\t"+loci[1]+"\t"+ref+"\t"+",".join(loci[3])+"\t"+str(delet)+"\t"+str(insert)+"\t"+"\t".join([str(x) for x in statsnp])
+ return loci[0]+"\t"+loci[1]+"\t"+ref+"\t"+",".join(loci[3])+"\t"+str(nbalt)+"\t"+str(delet)+"\t"+str(insert)+"\t"+"\t".join([str(x) for x in statsnp])
 
 
 

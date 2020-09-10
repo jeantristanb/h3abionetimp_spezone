@@ -81,7 +81,7 @@ params.exclude_bed=""
 params.bed=""
 params.genetic_map=""
 params.genetic_map_beagle=""
-params.max_missing=0.99
+params.max_missing=0.5
 
 if (params.help) {
     params.each {
@@ -170,7 +170,7 @@ if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!
          begin=params.from_bp!=""? "--from-bp  ${params.from_bp}" : "" 
          maf=params.maf!="" ? "--maf ${params.maf} " : ""
          keep=params.keep!="" ? " --keep ${file_ind} " : ""
-         excl_bed=params.exclude_bed!="" ? " --exclude_bed $exclude_bed " : "" 
+         excl_bed=params.exclude_bed!="" ? " --exclude-bed $exclude_bed " : "" 
          bed=params.bed!="" ? " --bed $bedf " : ""
          out_file="${params.output}_filt1"
          maxmissing=params.max_missing<1 ? " --max-missing ${params.max_missing} " : ""
@@ -264,7 +264,7 @@ process ComputeStatFilter{
   script :
     headout="${params.output}_stat"
     """
-    compute_statvcf.py  --vcf $headout --out $headout
+    compute_statvcf.py  --vcf $filevcf --out $headout
     """
 }
 
@@ -361,6 +361,7 @@ process shapeit_convert_vcf{
  publishDir "${params.output_dir}/shapeit/vcf/", overwrite:true, mode:'copy'
  output :
   file("$headout*")
+  file("${headout}.phased.vcf") into shapeit_vcf
  script :
    headout="${params.output}_phaseshapeit"
    """
@@ -368,6 +369,26 @@ process shapeit_convert_vcf{
         --input-haps  $haps $sample \
         --output-vcf $headout".phased.vcf"
    """
+}
+
+process shapeit_reagg_vcf{
+  input :
+    file(vcf) from shapeit_vcf
+  publishDir "${params.output_dir}/shapeit/vcf/", overwrite:true, mode:'copy'
+  output :
+     file("${headout}_reag.phased.vcf") into shapeit_vcf
+  script :
+   headout="${params.output}_phaseshapeit"
+   """ 
+   reaggrvcf.py --vcfi  $vcf --vcfout $headout"_reag.phased.vcf0"
+   """
+
+
+}
+
+
+
+
 }
 
 
