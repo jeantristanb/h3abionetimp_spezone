@@ -246,7 +246,7 @@ process format_impute2{
   publishDir "${params.output_dir}/impute2/", overwrite:true, mode:'copy'
   output :
       file("$headout*")
-      file("${headout}.vcf.gz") into vcf_impute2gz
+      file("${headout}.vcf.gz") into (vcf_impute2gz, vcf_impute2gz_2)
   script :
     headout="${params.output}_impute2"
     chro=params.chro
@@ -273,20 +273,20 @@ process reag_imp2{
 
 
 
- process prephase_shapeit{
+ genetic_map_ch_3=Channel.fromPath(params.genetic_map, checkIfExists:true)
+ process postphase_shapeit{
   cpus params.cpus_other
   input :
-      set file(file_vcf), file(vcffilecsi) from file_vcf_norm
-      file(genetic_map) from genetic_map_ch
-  publishDir "${params.output_dir}/impute2/", overwrite:true, mode:'copy'
+      file(file_vcf)  from vcf_impute2gz_2
+      file(genetic_map) from genetic_map_ch_3
+  publishDir "${params.output_dir}/impute2/postphase", overwrite:true, mode:'copy'
   output :
-      file("${fileout}.log")
-      set file("${fileout}.haps"), file("${fileout}.sample")   into file_haps_prephase
+      file("${fileout}*")
   script :
       chro=params.chr!=""? "--chrom=${params.chr}" : ""
       begin=params.to_bp!=""? "--bpStart=${params.from_bp}" : ""
       end=params.from_bp!=""? "--bpEnd=${params.to_bp}" : ""
-      fileout="${params.output}_phase_shapeit"
+      fileout="${params.output}_impute2"
       """
       ${params.bin_shapeit} \
        -V $file_vcf\
@@ -297,6 +297,10 @@ process reag_imp2{
        --effective-size ${params.effective_size} \
        --output-log ${fileout}".log" \
        --force
+        ${params.bin_shapeit} -convert \
+        --input-haps  $fileout".haps" $fileout".sample" \
+        --output-vcf $fileout".phased.vcf"
+        ${params.bin_bcftools} norm -m +any  $fileout".phased.vcf" -Oz -o $fileout"_reagr.phased.vcf.gz"
       """
  }
 
