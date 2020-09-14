@@ -47,10 +47,17 @@ params.queue      = 'batch'
 params.work_dir   = "$HOME/"
 params.output_dir = "${params.work_dir}/reference_panel"
 params.output = "refpanel"
+
 params.otheropt_beagle = ""
-/*"input_col_ref", "keep", "chr", "from_bp", "to_bp", "extract", "keep", "output_dir"*/
+
 params.input_col_ref=""
 params.input_vcf_ref=""
+params.fasta_file=""
+params.exclude_bed=""
+params.bed=""
+params.genetic_map=""
+params.genetic_map_beagle=""
+
 params.keep=""
 params.chr=""
 params.from_bp=""
@@ -61,6 +68,7 @@ params.convert_file=""
 /**/
 //params.bp_flanking=1
 
+params.max_missing=0.5
 /**/
 params.thr_shapeit=0.95
 /*software information */
@@ -68,20 +76,21 @@ params.thr_shapeit=0.95
 params.bin_beagle="beagle"
 params.bin_tabix="tabix"
 params.bin_vcftools="vcftools"
-params.bin_bcftools="bcftools"
 params.bin_shapeit="shapeit"
 params.bin_bref3="bref3"
 params.bin_eagle="eagle"
+params.bin_bcftools="bcftools"
 
 params.memory_vcftools="10GB"
+params.memory_other="20GB"
 params.memory_tabix="10GB"
 params.cpus_other=4
 params.bin_crossmap="~/.local/bin/CrossMap_beta.py"
-params.exclude_bed=""
-params.bed=""
-params.genetic_map=""
-params.genetic_map_beagle=""
-params.max_missing=0.5
+
+
+from_bp=params.from_bp
+to_bp=params.to_bp
+
 
 if (params.help) {
     params.each {
@@ -117,13 +126,13 @@ if(tmpref=="http:" || tmpref=="https:" || tmpref=="ftp:"){
 
 if(vcfrefext){
  process GetDataFTP{
- memory params.memory_tabix
+  memory params.memory_tabix
   output :
      file(newvcf) into file_vcf_tofilter  
   script :
     newvcf=params.output+"_sub.vcf"
     posinf=params.chr!=""? "${params.chr}" : "" 
-    posinf=(params.to_bp!="" && params.from_bp!="") ? " $posinf:${params.from_bp}-${params.to_bp}" : posinf
+    posinf=(to_bp!="" && from_bp!="") ? " $posinf:${from_bp}-${to_bp}" : posinf
     """ 
     ${params.bin_tabix} -h ${params.input_vcf_ref} $posinf > $newvcf
     """
@@ -132,25 +141,25 @@ if(vcfrefext){
 
 vcfrefisgz=file_vcf_tofilter.getExtension()=='gz'
 }else{
-      file_vcf_tofilter=Channel.fromPath(params.input_vcf_ref)
+      file_vcf_tofilter=Channel.fromPath(params.input_vcf_ref, checkIfExists:true)
       vcfrefisgz=file(params.input_vcf_ref).getExtension()=='gz'
 }
 
 //case where need to do some filtering or added information
-if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.keep!="" || params.maf!="" || params.convert_file!="" || params.exclude_bed!=""|| params.max_missing<1){
+if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!="" && to_bp!="" && from_bp!="") || params.keep!="" || params.maf!="" || params.convert_file!="" || params.exclude_bed!=""|| params.max_missing<1){
 
-  if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.exclude_bed!="" || params.bed!="" || params.max_missing<1){
+  if(params.keep!="" || params.chr!="" || (params.chr!="" && to_bp!="" && from_bp!="") || params.exclude_bed!="" || params.bed!="" || params.max_missing<1){
      if(params.keep!=""){
-      keep_file_ch=Channel.fromPath(params.keep)
+      keep_file_ch=Channel.fromPath(params.keep, checkIfExists:true)
      }else{
       keep_file_ch=file('No_ind')
      }
      if(params.exclude_bed!=""){
-       exclude_bed_ch=Channel.fromPath(params.exclude_bed)
+       exclude_bed_ch=Channel.fromPath(params.exclude_bed, checkIfExists:true)
      }else{
        exclude_bed_ch=file("exclude_bed_no")
      }
-     if (params.bed!="") bed_ch=Channel.fromPath(params.bed)
+     if (params.bed!="") bed_ch=Channel.fromPath(params.bed,checkIfExists:true)
      else bed_ch=file("bed_no")
 
      process FiltersVcfI{
@@ -166,8 +175,8 @@ if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!
       script :
          gvcf= file_vcf.getExtension()  ? "--gzvcf" : "--vcf" 
          chro=params.chr!=""? "--chr ${params.chr}" : ""
-         end=params.to_bp!=""? "--to-bp  ${params.to_bp}" : "" 
-         begin=params.from_bp!=""? "--from-bp  ${params.from_bp}" : "" 
+         end=to_bp!=""? "--to-bp  ${to_bp}" : "" 
+         begin=from_bp!=""? "--from-bp  ${from_bp}" : "" 
          maf=params.maf!="" ? "--maf ${params.maf} " : ""
          keep=params.keep!="" ? " --keep ${file_ind} " : ""
          excl_bed=params.exclude_bed!="" ? " --exclude-bed $exclude_bed " : "" 
@@ -188,7 +197,7 @@ if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!
       println "error fasta file not found" 
       exit 1
     }
-    fastafile_ch=Channel.fromPath(params.fasta_file)
+    fastafile_ch=Channel.fromPath(params.fasta_file, checkIfExists:true)
     file_conv_ch=Channel.fromPath(params.convert_file)
     process ConvertPosition{
       input :
@@ -206,7 +215,7 @@ if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!
         """
     }
     vcfrefisgz=0
-
+     
   }else{
     file_vcf_filter_2 = file_vcf_filter_1
   }
@@ -372,25 +381,18 @@ process shapeit_convert_vcf{
 }
 
 process shapeit_reagg_vcf{
+  memory params.memory_other
   input :
     file(vcf) from shapeit_vcf
   publishDir "${params.output_dir}/shapeit/vcf/", overwrite:true, mode:'copy'
   output :
-     file("${headout}_reag.phased.vcf") into shapeit_vcf
+     file("${headout}_reag.phased.vcf.gz") 
   script :
    headout="${params.output}_phaseshapeit"
    """ 
-   reaggrvcf.py --vcfi  $vcf --vcfout $headout"_reag.phased.vcf0"
+   ${params.bin_bcftools} norm -m +any  $vcf -Oz -o $headout"_reag.phased.vcf.gz"
    """
-
-
 }
-
-
-
-
-}
-
 
 gm_ch3=Channel.fromPath(params.genetic_map)
 //                --maxMissingPerSnp=${params.max_missing} \
@@ -402,20 +404,32 @@ process eagle_phase{
     publishDir "${params.output_dir}/eagle/vcf/", overwrite:true, mode:'copy'
     output :
       file("${file_out}*")
+      file("${file_out}.vcf.gz") into eagle_vcf
     script :
-      chro=params.chr!=""? "--chrom=${params.chr}" : ""
-      begin=params.to_bp!=""? "--bpStart=${params.to_bp}" : ""
-      end=params.from_bp!=""? "--bpEnd=${params.from_bp}" : ""
+      //chro=params.chr!=""? "--chrom=${params.chr}" : ""
+      //begin=to_bp!=""? "--bpStart=${to_bp}" : ""
+      //end=from_bp!=""? "--bpEnd=${from_bp}" : ""
       file_out="${params.output}_prephase_eagle"
       """
         ${params.bin_eagle}\
                 --vcf=${filevcf} \
                 --geneticMapFile=${map} \
                 --vcfOutFormat=z \
-                $chro \
-                $begin \
-                $end \
                 --outPrefix=${file_out} 2>&1 | tee ${file_out}.log
       """
+}
+process eagle_reagg_vcf{
+  memory params.memory_other
+  input :
+    file(vcf) from eagle_vcf
+  publishDir "${params.output_dir}/eagle/vcf/", overwrite:true, mode:'copy'
+  output :
+     file("${headout}_reag.phased.vcf.gz") 
+  script :
+   headout="${params.output}_phaseeagle"
+   """ 
+   #reaggrvcf.py --vcfi  $vcf --vcfout $headout"_reag.phased.vcf"
+   ${params.bin_bcftools} norm -m +any  $vcf -Oz -o $headout"_reag.phased.vcf.gz"
+   """
 }
 

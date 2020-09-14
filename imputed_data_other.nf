@@ -155,7 +155,7 @@ genetic_map_ch=Channel.fromPath(params.genetic_map, checkIfExists:true)
       file(genetic_map) from genetic_map_ch
       file(ref_vcf) from ref_vcf_ch
   output :
-      file(fileout) into file_vcf_prephase
+      file(fileout) into file_haps_prephase
   script :
       chro=params.chr!=""? "--chrom=${params.chr}" : ""
       begin=params.to_bp!=""? "--bpStart=${params.from_bp}" : ""

@@ -1,8 +1,28 @@
 #!/usr/bin/env python
+import gzip
 from utils import *
 from utils_div import *
 import sys
 import argparse
+
+
+
+
+
+
+def get_header_vcf(File):
+    VcfRead=open_file(File)
+    Entete=[]
+    for line in VcfRead:
+       if line[0]=="#" :
+         Entete.append(line.lower().replace("\n",""))
+       else :
+        VcfRead.close()
+        return Entete
+    VcfRead.close()
+    return Entete
+
+
 
 def parseArguments():
     parser = argparse.ArgumentParser(description='extract annotation for specific position')
@@ -12,26 +32,6 @@ def parseArguments():
     return args
 
 
-
-def getvcf(File):
-    headvcf=GetHeaderVcf(File)
-    readvcf=OpenFile(File, Type='r')
-    InfoDic={}
-    InfoPos={}
-    Head=""
-    for line in readvcf:
-      if line[0]!="#":
-        (Chro, Pos, Ref, ListAlt,Geno)=GetInfoVcf(line, None)
-        if  Chro not in InfoDic :
-           InfoDic[Chro]={}
-           InfoPos[Chro]={}
-        if Pos not in InfoDic[Chro].keys():
-          InfoDic[Chro][Pos]=[[Chro, Pos, Ref, ListAlt,Geno, line]]
-        else :
-          InfoDic[Chro][Pos].append([Chro, Pos, Ref, ListAlt,Geno, line])
-      else :
-        Head+=line 
-    return (InfoDic ,Head)
 
 def MergePosMulti(Chro, Pos, PosMultiInfo):
     ## check that ref is ok
@@ -83,6 +83,40 @@ def mergepos(Dic, Head, FileOut) :
          else :
             writevcf.write(InfoDic[chro][pos][0][5])
     
+def open_file(File, Type='r'):
+    typehead=File.split('.')[-1]
+    readgz=False
+    if typehead=='gz' or typehead=='.gzip':
+      readgz=True
+    try :
+       if readgz :
+         LireFich=gzip.open(File, Type)
+       else :
+         LireFich=open(File, Type)
+    except IOError:
+       sys.exit("File "+ File + " open in mode " + Type + "can't open File")
+    return LireFich
+
+def getvcf(File):
+    headvcf=get_header_vcf(File)
+    readvcf=open_file(File, Type='r')
+    InfoDic={}
+    InfoPos={}
+    Head=""
+    for line in readvcf:
+      if line[0]!="#":
+        (Chro, Pos, Ref, ListAlt,Geno)=GetInfoVcf(line, None)
+        if  Chro not in InfoDic :
+           InfoDic[Chro]={}
+           InfoPos[Chro]={}
+        if Pos not in InfoDic[Chro].keys():
+          InfoDic[Chro][Pos]=[[Chro, Pos, Ref, ListAlt,Geno, line]]
+        else :
+          InfoDic[Chro][Pos].append([Chro, Pos, Ref, ListAlt,Geno, line])
+      else :
+        Head+=line
+    return (InfoDic ,Head)
+
 
 args = parseArguments()
 ## first 
