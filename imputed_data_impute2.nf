@@ -53,6 +53,7 @@ params.vcf=""
 params.vcf_ref=""
 params.prephase=0
 params.thr_shapeit=0.95
+params.memory_impute2="20GB"
 
 params.effective_size=20000
 params.bin_beagle="beagle"
@@ -216,6 +217,7 @@ vcf_ref=Channel.fromPath(params.vcf_ref, checkIfExists:true)
  }
 }
 process impute2{
+  memory params.memory_impute2
   input :
      set file(haps_haps), file(haps_sampe) from file_haps_prephase
      file(maps) from genetic_map_ch_2
@@ -223,11 +225,11 @@ process impute2{
      file(leg_ref) from leg_ref_file
   publishDir "${params.output_dir}/impute2/intial", overwrite:true, mode:'copy'
   output :
-    file("$headout*")
-    set file("${headout}"), file(haps_sampe) into file_impute2
+    file("$headout2*")
+    set file("${headout2}"), file(haps_sampe) into file_impute2
   script :
     size=params.to_bp!=""? " -int ${params.from_bp} ${params.to_bp} ": ""
-    headout="${params.output}_impute2.gen"
+    headout2="${params.output}_impute2.gen"
     """
     ${params.bin_impute2}  ${size} \
       -known_haps_g ${haps_haps} \
@@ -236,7 +238,7 @@ process impute2{
       -m $maps \
       -Ne ${params.effective_size} \
       -buffer ${params.buffer_kb} \
-      -o $headout
+      -o $headout2
     """
 }
 
@@ -245,15 +247,15 @@ process format_impute2{
      set file(genfile), file(sample) from file_impute2
   publishDir "${params.output_dir}/impute2/", overwrite:true, mode:'copy'
   output :
-      file("$headout*")
-      file("${headout}.vcf.gz") into (vcf_impute2gz, vcf_impute2gz_2)
+      file("$headout3*")
+      file("${headout3}.vcf.gz") into (vcf_impute2gz, vcf_impute2gz_2)
   script :
-    headout="${params.output}_impute2"
-    chro=params.chro
+    headout3="${params.output}_impute2"
+    chro=params.chr
     """
-    awk -v chro=$chro '{\$2=chro":"\$3"_"\$4"_"\$5; print}' $genfile > $headout"_2.impute2"
-    ${params.bin_bcftools} convert --gensample2vcf $headout"_2.impute2",$sample -o $headout".vcf"
-    ${params.bin_bcftools} sort $headout".vcf"  -Oz -o  $headout".vcf.gz"
+    awk -v chro=$chro '{\$2=chro":"\$3"_"\$4"_"\$5; print}' $genfile > $headout3"_2.impute2"
+    ${params.bin_bcftools} convert --gensample2vcf $headout3"_2.impute2",$sample -o $headout3".vcf"
+    ${params.bin_bcftools} sort $headout3".vcf"  -Oz -o  $headout3".vcf.gz"
     """
 }
 
@@ -262,7 +264,7 @@ process reag_imp2{
    file(impvcfgz) from vcf_impute2gz
  publishDir "${params.output_dir}/impute2/", overwrite:true, mode:'copy'
  output :
-    file(headout)
+    file("$headout")
  script :
    headout="${params.output}_impute2_reag.vcf"
    """
@@ -282,6 +284,7 @@ process reag_imp2{
   publishDir "${params.output_dir}/impute2/postphase", overwrite:true, mode:'copy'
   output :
       file("${fileout}*")
+      file("${fileout}_reagr.phased.vcf.gz") into vcfpostphase
   script :
       chro=params.chr!=""? "--chrom=${params.chr}" : ""
       begin=params.to_bp!=""? "--bpStart=${params.from_bp}" : ""
@@ -303,4 +306,18 @@ process reag_imp2{
         ${params.bin_bcftools} norm -m +any  $fileout".phased.vcf" -Oz -o $fileout"_reagr.phased.vcf.gz"
       """
  }
+
+process reag_imp_postphase{
+ input:
+   file(impvcfgz) from vcfpostphase
+ publishDir "${params.output_dir}/impute2/postphase", overwrite:true, mode:'copy'
+ output :
+    file("$headout")
+ script :
+   headout="${params.output}_impute2_reag.vcf"
+   """
+   ${params.bin_bcftools} norm -m +any  $impvcfgz -Oz -o $headout
+   """
+}
+
 

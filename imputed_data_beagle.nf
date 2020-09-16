@@ -61,6 +61,7 @@ params.bin_eagle="eagle"
 params.bin_bref3="bref3"
 
 params.memory_vcftools="10GB"
+params.memory_beagle="20GB"
 params.memory_tabix="10GB"
 params.cpus_other=4
 params.bin_crossmap="~/.local/bin/CrossMap_beta.py"
@@ -218,6 +219,7 @@ process builbref3{
 }
 
 process beagle{
+  memory params.memory_beagle
   input :
     set file(vcf), file(vcfindex) from file_vcf_prephase
     file(ref) from brfref_ch
