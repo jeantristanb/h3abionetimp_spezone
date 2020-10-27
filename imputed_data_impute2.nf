@@ -50,6 +50,8 @@ params.maf=""
 params.exclude_bed=""
 params.bed=""
 params.vcf=""
+//Exclude sites on the basis of the proportion of missing data (defined to be between 0 and 1, where 0 allows sites that are completely missing and 1 indicates no missing data allowed).
+params.max_missing=0.999
 params.vcf_ref=""
 params.prephase=0
 params.thr_shapeit=0.95
@@ -89,7 +91,7 @@ vcfrefisgz=file(params.vcf).getExtension()=='gz'
 //vcfrefisgz=params.vcf.getExtension()=='gz'
 
 
-if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.exclude_bed!="" || params.bed!=""){
+if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.exclude_bed!="" || params.bed!="" || params.max_missing<1){
      if(params.keep!=""){
       keep_file_ch=Channel.fromPath(params.keep,checkIfExists:true)
      }else{
@@ -125,7 +127,7 @@ if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && p
          bed=params.bed!="" ? " --bed $bedf " : ""
          out_file="${params.output}_filt1"
          """
-         ${params.bin_vcftools} $gvcf $file_vcf $chro $end $begin $maf $keep --out ${out_file} --recode --recode-INFO-all $excl_bed $bed
+         ${params.bin_vcftools} $gvcf $file_vcf $chro $end $begin $maf $keep --out ${out_file} --recode --recode-INFO-all $excl_bed $bed --max-missing ${params.max_missing}
          ${params.bin_bcftools} sort ${out_file}".recode.vcf"  -Oz -o  ${out_file}".recode.vcf.gz"
          """
      }
@@ -266,7 +268,7 @@ process reag_imp2{
  output :
     file("$headout")
  script :
-   headout="${params.output}_impute2_reag.vcf"
+   headout="${params.output}_impute2_reag.vcf.gz"
    """
    ${params.bin_bcftools} norm -m +any  $impvcfgz -Oz -o $headout
    """
@@ -314,7 +316,7 @@ process reag_imp_postphase{
  output :
     file("$headout")
  script :
-   headout="${params.output}_impute2_reag.vcf"
+   headout="${params.output}_impute2_reag.vcf.gz"
    """
    ${params.bin_bcftools} norm -m +any  $impvcfgz -Oz -o $headout
    """

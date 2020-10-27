@@ -16,6 +16,7 @@ nextflow build_ref.nf --input_vcf_ref file_vcf
  * `maf` : minor allele frequencie [Optional]
  * `exclude_bed`
  * `bed` : 
+ * `max_missing` : Exclude sites on the basis of the proportion of missing data (defined to be between 0 and 1, where 0 allows sites that are completely missing and 1 indicates no missing data allowed).
 * to do :
  * `extract` : not implemented
 * convert between format (optional):

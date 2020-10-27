@@ -198,7 +198,7 @@ if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!
       exit 1
     }
     fastafile_ch=Channel.fromPath(params.fasta_file, checkIfExists:true)
-    file_conv_ch=Channel.fromPath(params.convert_file)
+    file_conv_ch=Channel.fromPath(params.convert_file, checkIfExists:true)
     process ConvertPosition{
       input :
          file(vcfI) from file_vcf_filter_1
@@ -206,12 +206,14 @@ if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!
          file(fasta) from fastafile_ch
        publishDir "${params.output_dir}/crossmap_out/", overwrite:true, mode:'copy'
        output :
-          file("${vcffinal}.unmap")
+          file("${headfinal}.tmp.vcf.unmap")
           file(vcffinal) into file_vcf_filter_2 
        script :
-        vcffinal="${params.output}_filt1_newpos.vcf"
+        headfinal="${params.output}_filt1_newpos"
+        vcffinal="${params.output}_filt1_newpos.recode.vcf"
         """
-        ${params.bin_crossmap}  vcf $convert $vcfI $fasta $vcffinal
+        ${params.bin_crossmap}  vcf $convert $vcfI $fasta $headfinal".tmp.vcf"
+        vcftools --vcf $headfinal".tmp.vcf"  --chr ${params.chr} --recode --recode-INFO-all --out $headfinal
         """
     }
     vcfrefisgz=0
@@ -220,12 +222,13 @@ if(params.input_col_ref!="" || params.keep!="" || params.chr!="" || (params.chr!
     file_vcf_filter_2 = file_vcf_filter_1
   }
   if(params.input_col_ref!=""){
-     inputcolref=Channel.fromPath(params.input_col_ref)
+     inputcolref=Channel.fromPath(params.input_col_ref, checkIfExists:true)
      process AddPosition {
-        input:
+       input:
           file(filevcfi) from file_vcf_filter_2
           file(colreffile) from inputcolref  
-         output :
+        publishDir "${params.output_dir}/addpos/", overwrite:true, mode:'copy'
+        output :
            file("${fileposvcf}*")
            file("$filevcffinal") into file_vcf_filter_final 
         script :
@@ -293,7 +296,7 @@ process  normvcf{
 }
 
 if(params.genetic_map_beagle!=""){
-      gm_ch=Channel.fromPath(params.genetic_map)
+      gm_ch=Channel.fromPath(params.genetic_map, checkIfExists:true)
      }else{
       gm_ch=file('nogenetmap')
 }
@@ -332,7 +335,7 @@ process convertbeagle{
 
 
 
-gm_ch2=Channel.fromPath(params.genetic_map)
+gm_ch2=Channel.fromPath(params.genetic_map, checkIfExists:true)
 process shapeit_phase{
  cpus params.cpus_other
  input :
@@ -394,7 +397,7 @@ process shapeit_reagg_vcf{
    """
 }
 
-gm_ch3=Channel.fromPath(params.genetic_map)
+gm_ch3=Channel.fromPath(params.genetic_map, checkIfExists:true)
 //                --maxMissingPerSnp=${params.max_missing} \
 //                --maxMissingPerIndiv=${params.max_missing} \
 process eagle_phase{
