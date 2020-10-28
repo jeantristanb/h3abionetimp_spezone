@@ -84,7 +84,7 @@ vcfrefisgz=file(params.vcf).getExtension()=='gz'
 //vcfrefisgz=params.vcf.getExtension()=='gz'
 
 
-if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.exclude_bed!="" || params.bed!="" || || params.max_missing<1){
+if(params.keep!="" || params.chr!="" || (params.chr!="" && params.to_bp!="" && params.from_bp!="") || params.exclude_bed!="" || params.bed!="" ||  params.max_missing<1){
      if(params.keep!=""){
       keep_file_ch=Channel.fromPath(params.keep,checkIfExists:true)
      }else{
