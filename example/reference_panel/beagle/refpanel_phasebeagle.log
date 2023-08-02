@@ -1,0 +1,47 @@
+beagle.18May20.d20.jar (version 5.1)
+Copyright (C) 2014-2018 Brian L. Browning
+Enter "java -jar beagle.18May20.d20.jar" to list command line argument
+Start time: 01:17 PM SAST on 14 Sep 2020
+
+Command line: java -Xmx27305m -jar beagle.18May20.d20.jar
+  gt=refpanel_sort.vcf.gz
+  nthreads=4
+  out=refpanel_phasebeagle
+
+No genetic map is specified: using 1 cM = 1 Mb
+
+Reference samples:           0
+Study samples:             536
+
+Window 1 (chr19:45303073-45502808)
+Study markers:           1,352
+
+Burnin  iteration 1:           1 second
+Burnin  iteration 2:           1 second
+Burnin  iteration 3:           1 second
+Burnin  iteration 4:           1 second
+Burnin  iteration 5:           1 second
+Burnin  iteration 6:           1 second
+
+Phasing iteration 1:           1 second
+Phasing iteration 2:           1 second
+Phasing iteration 3:           1 second
+Phasing iteration 4:           1 second
+Phasing iteration 5:           1 second
+Phasing iteration 6:           1 second
+Phasing iteration 7:           1 second
+Phasing iteration 8:           1 second
+Phasing iteration 9:           1 second
+Phasing iteration 10:          1 second
+Phasing iteration 11:          1 second
+Phasing iteration 12:          0 seconds
+
+Cumulative Statistics:
+
+Study markers:           1,352
+
+Haplotype phasing time:        11 seconds
+Total time:                    13 seconds
+
+End time: 01:17 PM SAST on 14 Sep 2020
+beagle.18May20.d20.jar finished

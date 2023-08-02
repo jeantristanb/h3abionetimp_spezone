@@ -1,0 +1,215 @@
+                      +-----------------------------+
+                      |                             |
+                      |   Eagle v2.4.1              |
+                      |   November 18, 2018         |
+                      |   Po-Ru Loh                 |
+                      |                             |
+                      +-----------------------------+
+
+Copyright (C) 2015-2018 Harvard University.
+Distributed under the GNU GPLv3+ open source license.
+
+Command line options:
+
+eagle \
+    --vcf=refpanel_sort_norm.vcf.gz \
+    --geneticMapFile=chr19_genmap.genmap \
+    --vcfOutFormat=z \
+    --outPrefix=refpanel_prephase_eagle 
+
+Setting number of threads to 1
+
+=== Reading genotype data ===
+
+Reading genotypes for N = 536 samples
+Read M = 1443 variants
+Filling in genetic map coordinates using reference file:
+  chr19_genmap.genmap
+Physical distance range: 199735 base pairs
+Genetic distance range:  0.577319 cM
+Average # SNPs per cM:   2499
+Auto-selecting --maxBlockLen: 0.25 cM
+Number of <=(64-SNP, 0.25cM) segments: 23
+Average # SNPs per segment: 62
+Fraction of heterozygous genotypes: 0.167901
+Typical span of default 100-het history length: 0.24 cM
+Setting --histFactor=4.20
+Typical span of 419-het history length: 1.00 cM
+
+SKIPPED STEP 1
+
+SKIPPED STEP 2
+
+
+BEGINNING STEP 3 (PBWT ITERS)
+
+Auto-selecting number of PBWT iterations: setting --pbwtIters to 3
+
+
+BEGINNING PBWT ITER 1
+
+BATCH 1 OF 10
+
+Phasing samples 1-53
+Time for phasing batch: 3.79299
+
+BATCH 2 OF 10
+
+Phasing samples 54-107
+Time for phasing batch: 3.23104
+
+BATCH 3 OF 10
+
+Phasing samples 108-160
+Time for phasing batch: 3.36432
+
+BATCH 4 OF 10
+
+Phasing samples 161-214
+WARNING: Sample 171 (1-indexed) has a het count of 1
+Time for phasing batch: 3.17436
+
+BATCH 5 OF 10
+
+Phasing samples 215-268
+Time for phasing batch: 2.9756
+
+BATCH 6 OF 10
+
+Phasing samples 269-321
+Time for phasing batch: 2.55227
+
+BATCH 7 OF 10
+
+Phasing samples 322-375
+Time for phasing batch: 2.646
+
+BATCH 8 OF 10
+
+Phasing samples 376-428
+Time for phasing batch: 2.74081
+
+BATCH 9 OF 10
+
+Phasing samples 429-482
+Time for phasing batch: 2.97509
+
+BATCH 10 OF 10
+
+Phasing samples 483-536
+Time for phasing batch: 2.90438
+
+Time for PBWT iter 1: 30.357
+
+BEGINNING PBWT ITER 2
+
+BATCH 1 OF 10
+
+Phasing samples 1-53
+Time for phasing batch: 3.26913
+
+BATCH 2 OF 10
+
+Phasing samples 54-107
+Time for phasing batch: 2.584
+
+BATCH 3 OF 10
+
+Phasing samples 108-160
+Time for phasing batch: 2.84085
+
+BATCH 4 OF 10
+
+Phasing samples 161-214
+WARNING: Sample 171 (1-indexed) has a het count of 1
+Time for phasing batch: 2.3869
+
+BATCH 5 OF 10
+
+Phasing samples 215-268
+Time for phasing batch: 2.76836
+
+BATCH 6 OF 10
+
+Phasing samples 269-321
+Time for phasing batch: 2.38348
+
+BATCH 7 OF 10
+
+Phasing samples 322-375
+Time for phasing batch: 2.88669
+
+BATCH 8 OF 10
+
+Phasing samples 376-428
+Time for phasing batch: 3.30828
+
+BATCH 9 OF 10
+
+Phasing samples 429-482
+Time for phasing batch: 3.79541
+
+BATCH 10 OF 10
+
+Phasing samples 483-536
+Time for phasing batch: 3.71494
+
+Time for PBWT iter 2: 29.9381
+
+BEGINNING PBWT ITER 3
+
+BATCH 1 OF 10
+
+Phasing samples 1-53
+Time for phasing batch: 5.96489
+
+BATCH 2 OF 10
+
+Phasing samples 54-107
+Time for phasing batch: 5.91352
+
+BATCH 3 OF 10
+
+Phasing samples 108-160
+Time for phasing batch: 5.70861
+
+BATCH 4 OF 10
+
+Phasing samples 161-214
+WARNING: Sample 171 (1-indexed) has a het count of 1
+Time for phasing batch: 4.19404
+
+BATCH 5 OF 10
+
+Phasing samples 215-268
+Time for phasing batch: 4.5734
+
+BATCH 6 OF 10
+
+Phasing samples 269-321
+Time for phasing batch: 3.74659
+
+BATCH 7 OF 10
+
+Phasing samples 322-375
+Time for phasing batch: 4.26203
+
+BATCH 8 OF 10
+
+Phasing samples 376-428
+Time for phasing batch: 4.21226
+
+BATCH 9 OF 10
+
+Phasing samples 429-482
+Time for phasing batch: 4.24302
+
+BATCH 10 OF 10
+
+Phasing samples 483-536
+Time for phasing batch: 4.42103
+
+Time for PBWT iter 3: 47.2395
+Writing vcf.gz output to refpanel_prephase_eagle.vcf.gz
+Time for writing output: 4.45563
+Total elapsed time for analysis = 113.089 sec

@@ -1,0 +1,29 @@
+FROM ubuntu:18.04
+ENV PYTHONNOUSERSITE 1 
+#ENV plinksrc "plink_linux_x86_64_20190617.zip"
+ENV bindir "/opt/bin"
+ENV PATH=$bindir:$PATH
+RUN mkdir -p $bindir
+RUN apt update &&  apt install -y wget gcc g++ unzip make libboost-all-dev zlib1g-dev vim default-jre python3 python3-pip git #zlib-dev
+RUN git clone https://github.com/odelaneau/shapeit4.git 
+#RUN cd shapeit4
+#RUN make 
+#RUN cp shapeit4 $bindir/
+#RUN cd ../
+#RUN wget http://stephenslab.uchicago.edu/assets/software/phase/phasecode/phase.2.1.1.linux.tar.gz
+#RUN tar -xzf phase.2.1.1.linux.tar.gz
+#RUN mv phase.2.1.1.linux/PHASE $bindir/
+
+
+#RUN wget http://s3.amazonaws.com/plink1-assets/$plinksrc && unzip $plinksrc -d $bindir && \
+#rm $plinksrc $bindir/toy.ped $bindir/toy.map $bindir/LICENSE && \
+#chmod a+x $bindir/plink
+## GWAMMA installation 
+##RUN mkdir /usr/local/src/gwama && wget http://www.geenivaramu.ee/tools/$gwamasrc && unzip $gwamasrc -d /usr/local/src/gwama/ && \
+#cd usr/local/src/gwama/ && make  && mv GWAMA $bindir/ && rm /$gwamasrc 
+## Metal installation
+#RUN mkdir /usr/local/src/METAL && cd /usr/local/src/METAL && wget http://csg.sph.umich.edu/abecasis/metal/download/$metalsrc && tar -xzf $metalsrc  && cd generic-metal/ && make all && cp executables/metal $bindir/
+## MR-MEGA installation
+#RUN mkdir /usr/local/src/MRMEGA/ && cd /usr/local/src/MRMEGA/ && wget http://www.geenivaramu.ee/tools/$mrmegasrc && unzip $mrmegasrc && make &&cp MR-MEGA $bindir/
+#RUN cd $bindir/ && wget http://genetics.cs.ucla.edu/meta_jemdoc/repository/2.0.1/Metasoft.zip && unzip  Metasoft.zip  
+#RUN pip3 install numpy scipy matplotlib pandas scikit-learn==0.19.1 sympy nose 
